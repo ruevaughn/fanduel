@@ -32,6 +32,7 @@ class PlayerList
   end
 
   def quarterbacks
+    # Use search so its objects not array
     @players.map {|player| player if player.position == 'QB'}.compact
   end
 
@@ -51,14 +52,6 @@ class PlayerList
     @players.map {|player| player if player.position == 'K'}.compact
   end
 
-  def get_qb
-    qbs = quarterbacks.collect do |qb| 
-      price_per_point = (qb.salary / qb.fppg) if qb.salary.nonzero? && qb.fppg.nonzero?
-       {name: qb.name, price_per_point: price_per_point}
-    end
-    qbs = qbs.sort {|a,b| a[:price_per_point] <=> b[:price_per_point] }
-  end
-
 end
 
 class Player
@@ -68,6 +61,7 @@ class Player
   attr_accessor :fppg
   attr_accessor :played_count
   attr_accessor :salary
+  attr_accessor :price_per_point
 
   def initialize(opts)
     @id = opts[:id]
@@ -76,6 +70,17 @@ class Player
     @fppg = opts[:fppg]
     @played_count = opts[:played_count]  
     @salary = opts[:salary]
+
+    @price_per_point = price_per_point
+  end
+
+  def price_per_point 
+    if self.salary.nonzero? && self.fppg.nonzero?
+      self.salary / self.fppg  
+    else
+      0.0 
+    end
+
   end
 end
 
@@ -106,4 +111,5 @@ end
 team = Team.new
 list = PlayerList.new(players)
 
-list.get_qb
+player = players.first
+puts "#{player.name} - #{player.price_per_point}"
